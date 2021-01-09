@@ -12,21 +12,19 @@
     (migrations/migrate ["migrate"])
     (f)))
 
-(deftest test-users
+(deftest test-messages
   (jdbc/with-db-transaction [t-conn db/conn]
     (jdbc/db-set-rollback-only! t-conn)
-    (is (= 1 (db/create-user!
-               {:id         "1"
-                :first_name "Sam"
-                :last_name  "Smith"
-                :email      "sam.smith@example.com"
-                :pass       "pass"} {:connection t-conn})))
-    (is (= [{:id         "1"
-             :first_name "Sam"
-             :last_name  "Smith"
-             :email      "sam.smith@example.com"
-             :pass       "pass"
-             :admin      nil
-             :last_login nil
-             :is_active  nil}]
-           (db/get-user {:id "1"} {:connection t-conn})))))
+    (let [timestamp (java.util.Date.)]
+      (is (= 1 (db/save-message!
+                {:name "Bob"
+                 :message "Hello World"
+                 :timestamp timestamp}
+                {:connection t-conn})))
+      (is (=
+           {:name "Bob"
+            :message "Hello World"
+            :timestamp timestamp}
+           (-> (db/get-messages {} {:connection t-conn})
+               first
+               (select-keys [:name :message :timestamp])))))))
