@@ -6,6 +6,8 @@
     (fn []
       [:div.content
        [:div.form-group
+        [:p "name:" (:name @fields)]
+        [:p "message:" (:message @fields)]
         [:p "Name:"
          [:input.form-control
           {:type :text
