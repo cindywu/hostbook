@@ -7,11 +7,9 @@
             [bouncer.validators :as v]
             [ring.util.response :refer [response status]]))
 
-(defn home-page [{:keys [flash]}]
+(defn home-page []
   (layout/render
-    "home.html"
-    (merge {:messages (db/get-messages)}
-           (select-keys flash [:name :message :errors]))))
+    "home.html"))
 
 (defn validate-message [params]
   (first
@@ -35,7 +33,8 @@
   (layout/render "about.html"))
 
 (defroutes home-routes
-  (GET "/" request (home-page request))
+  (GET "/" [] (home-page))
+  (GET "/messages" [] (response (db/get-messages)))
   (POST "/add-message" req (save-message! req))
   (GET "/about" [] (about-page)))
 
