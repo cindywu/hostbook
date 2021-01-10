@@ -27,8 +27,6 @@
     (fn []
       [:div.content
        [:div.form-group
-        [:p "name:" (:name @fields)]
-        [:p "message:" (:message @fields)]
         [errors-component errors :name]
         [:p "Name:"
          [:input.form-control
