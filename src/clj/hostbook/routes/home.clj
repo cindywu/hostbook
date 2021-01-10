@@ -4,7 +4,8 @@
             [ring.util.http-response :as response]
             [hostbook.db.core :as db]
             [bouncer.core :as b]
-            [bouncer.validators :as v]))
+            [bouncer.validators :as v]
+            [ring.util.response :refer [response status]]))
 
 (defn home-page [{:keys [flash]}]
   (layout/render
@@ -21,18 +22,20 @@
 
 (defn save-message! [{:keys [params]}]
   (if-let [errors (validate-message params)]
-    (-> (response/found "/")
-        (assoc :flash (assoc params :errors errors)))
-    (do
+    (response/bad-request {:errors errors})
+    (try
       (db/save-message!
        (assoc params :timestamp (java.util.Date.)))
-      (response/found "/"))))
+      (response/ok {:status :ok})
+      (catch Exception e
+        (response/internal-server-error
+         {:erorrs {:server-error ["Failed to save message!"]}})))))
 
 (defn about-page []
   (layout/render "about.html"))
 
 (defroutes home-routes
   (GET "/" request (home-page request))
-  (POST "/message" request (save-message! request))
+  (POST "/add-message" req (save-message! req))
   (GET "/about" [] (about-page)))
 
